@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "554298346251",
+    "firebase_url": "https://dcheck-e7d40.firebaseio.com",
+    "project_id": "dcheck-e7d40",
+    "storage_bucket": "dcheck-e7d40.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554298346251:android:cc42c2c88d57541435300e",
+        "android_client_info": {
+          "package_name": "com.dcheck"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "554298346251-l3tv3r1hq10dqok1qa6jh3v7omknhibg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkFIivjleR73y4Sq2hbVz3TaHdpXky2Rk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "554298346251-l3tv3r1hq10dqok1qa6jh3v7omknhibg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
