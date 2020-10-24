@@ -88,6 +88,9 @@ export default Styles =  StyleSheet.create({
     resBody:{
         width: width * 0.9,
         marginLeft : width * 0.05,
+        marginTop: 10,
+        borderBottomColor: '#f2f2f2',
+        borderBottomWidth: 1
     },
     bottomBtn:{
         height: height * 0.07,
@@ -111,7 +114,8 @@ export default Styles =  StyleSheet.create({
         justifyContent: 'center',
         alignContent: 'center',
         backgroundColor: '#4E00FF',
-        borderRadius: 8 
+        borderRadius: 8,
+        textTransform: 'uppercase'
     },
 
     mainInput:{
@@ -124,6 +128,9 @@ export default Styles =  StyleSheet.create({
         width: width * 0.9,
         textAlign: 'center',
         marginLeft : width * 0.05,
+        textTransform: 'uppercase',
+        fontSize: 20,
+        fontWeight: '900'
     },
 
     inputs:{

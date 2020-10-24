@@ -1,5 +1,5 @@
 import React from 'react'
-import {Text, View,Alert, PermissionsAndroid} from 'react-native'
+import {Alert, PermissionsAndroid} from 'react-native'
 import {NavigationContainer} from '@react-navigation/native'
 import Stack from './Stack/Stack'
 import SplashScreen from 'react-native-splash-screen'
@@ -35,9 +35,9 @@ export default class App extends React.Component{
               }
           )
           if (granted === PermissionsAndroid.RESULTS.GRANTED){
-            console.log('')
+            //do nothing
           } else {
-            Alert.alert('',"Please not that by denying DCHECK to access your location, you may not be able to report a driver");
+            Alert.alert('',"Please not that by denying DCHECK to access your location, you may not be able to submit driver reports");
           }
       } catch (err) {
           console.warn(err)

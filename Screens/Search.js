@@ -5,8 +5,6 @@ import Styles from '../Styles/Styles'
 import database from '@react-native-firebase/database';
 import Geolocation from '@react-native-community/geolocation';
 
-
-
 export default class Search extends React.Component{
     constructor(props){
         super(props)
@@ -43,20 +41,21 @@ export default class Search extends React.Component{
     }
 
     search(){
-
-        if (this.state.plate != ''){
+        var numberPlate = this.state.plate;
+        console.warn(numberPlate.length);
+        if (numberPlate != '' && numberPlate.length > 5){
             this.setState({
                 showLoading: true
             }, () =>{
-            let key = this.state.plate.replace(/\s/g,'')
-            key = key.toUpperCase()
+            let key = this.state.plate.replace(/\s/g,'');
+            key = key.toUpperCase();
                 database().ref('Reports/' +  key + '/').on('value', data =>{
                     let tempArr = new Array();
                     if (data.val() != null || data.val() != undefined){
                         let values = data.val();
                         let keys = Object.keys(values);
                         for (var x = 0; x < keys.length; x++){
-                            tempArr.push(values[keys[x]])
+                            tempArr.push(values[keys[x]]);
                         }
                         setTimeout(() => {
                             this.setState({
@@ -73,12 +72,12 @@ export default class Search extends React.Component{
                             }, () =>{
                                 this.props.navigation.navigate('Results', {plate: this.state.plate, found:false, res: this.state.searchRes, location: this.state.location})
                             })
-                        }, 500);
+                        }, 700);
                     }
                 })
             })
         }else{
-            Alert.alert('', 'Please insert the number plate before you can search')
+            Alert.alert('', 'Please insert the number plate before you search')
         }
     }
 
@@ -89,12 +88,12 @@ export default class Search extends React.Component{
                     <View style={Styles.headerContainer}>
                         <Text style={Styles.headerText} >DCHECK</Text>
                         <View style={Styles.innerText}>
-                        <Text>Ready to start your ride? Look-up your driver by his number-plate.</Text>
+                        <Text>Ready to start your ride? Look-up your driver by his number plate.</Text>
                         </View>
                     </View>
 
             <View style={Styles.mainBody}>
-                    <TextInput style={Styles.mainInput} onChangeText={(txt)=>{this.setState({plate:txt})}} placeholderTextColor='#2F2F2F' placeholder="Number-plate" />
+                    <TextInput style={Styles.mainInput} maxLength={9} value={this.state.plate} onChangeText={(txt)=>{this.setState({plate:txt.replace(' ', '')})}} autoCapitalize={'characters'} placeholderTextColor='#2F2F2F' placeholder="Number Plate" />
                     <Text></Text>
                     <TouchableOpacity style={Styles.midBtn} onPress={()=>{this.search()}}>
                         <Text style={Styles.btnText} >SEARCH</Text>
@@ -110,7 +109,7 @@ export default class Search extends React.Component{
                     opacity: 0.3
                 }}
                 >
-                    <ActivityIndicator size="large" color="red" />
+                    <ActivityIndicator size="large" color="#4E00FF" />
                 </View>
             </Modal>
 
@@ -119,8 +118,6 @@ export default class Search extends React.Component{
                     <Text style={Styles.btnText} >REPORT A DRIVER</Text>
                 </TouchableOpacity>
             </View>
-
-   
                 
             </View>
         )

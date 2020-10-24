@@ -1,6 +1,7 @@
 import React from 'react'
 import {Text, View, TouchableOpacity, StatusBar, ScrollView, Image} from 'react-native'
 import Styles from '../Styles/Styles'
+import d_images from './Images.js';
 
 export default class Results extends React.Component{
     
@@ -39,10 +40,10 @@ export default class Results extends React.Component{
                     <Text></Text>
                     <Text style={{fontSize: 15, fontWeight:'bold', marginBottom: 8}}>Accusation against driver</Text>
                      <Text>{val.description}</Text>
-                </View>
-                    <View style={{flexDirection:'row'}} > 
+
+                     <View style={{flexDirection:'row', marginLeft: '-5%', paddingBottom: 15}} > 
                    <TouchableOpacity style={Styles.boxes} >
-                   <Image source={{ uri: val.img1 }}
+                   <Image source={{ uri: val.img1}}
                         style={Styles.img} />
                     </TouchableOpacity>
                     
@@ -56,6 +57,8 @@ export default class Results extends React.Component{
                         style={Styles.img} />
                     </TouchableOpacity>
                    </View>
+                </View>
+
             </View>
             )
         })

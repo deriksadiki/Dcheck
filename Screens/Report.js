@@ -30,6 +30,27 @@ export default class Report extends React.Component{
         })
     }
 
+    getLocation(){
+        Geolocation.getCurrentPosition((info) =>{
+            let obj = {
+                lat: info.coords.latitude,
+                lng: info.coords.longitude
+            }
+            this.setState({location: obj});
+            this.props.navigation.navigate('Report', {location : this.state.location});
+
+        }, (error) =>{
+            console.log('no location')
+        }, {enableHighAccuracy: true, timeout: 1500})
+    }
+
+    report(){
+        if(this.state.location === ''){
+            this.getLocation();
+        }
+        this.props.navigation.navigate('Report', {location : this.state.location})
+    }
+
     chooseFile = (number) => {
         var options = {
           title: 'Select Image',
@@ -124,7 +145,7 @@ export default class Report extends React.Component{
                 </View>
                
                <View>
-                   <TextInput style={Styles.inputs} onChangeText={(txt)=>{this.setState({plate: txt})}} placeholder="Number Plate"  placeholderTextColor='#2F2F2F' />
+                   <TextInput style={Styles.inputs} maxLength={9} value={this.state.plate} onChangeText={(txt)=>{this.setState({plate:txt.replace(' ', '')})}} autoCapitalize={'characters'} placeholder="Number Plate"  placeholderTextColor='#2F2F2F' />
                    <TextInput style={Styles.inputs} onChangeText={(txt)=>{this.setState({make: txt})}} placeholder="Car Make & Model"  placeholderTextColor='#2F2F2F' />
                    <TextInput style={Styles.inputs} onChangeText={(txt)=>{this.setState({color: txt})}} placeholder="Car Colour"  placeholderTextColor='#2F2F2F' />
                    <TextInput style={Styles.inputs} onChangeText={(txt)=>{this.setState({name: txt})}} placeholder="Driver Name"  placeholderTextColor='#2F2F2F' />
