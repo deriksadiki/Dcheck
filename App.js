@@ -15,7 +15,6 @@ export default class App extends React.Component{
     }, 4000);
   }
     
-
   getLocationPermission(){
     var that =this;
     if(Platform.OS === 'ios'){
