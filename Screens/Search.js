@@ -4,6 +4,9 @@ import {Text, View, TouchableOpacity, Alert, TextInput,StatusBar, ActivityIndica
 import Styles from '../Styles/Styles'
 import database from '@react-native-firebase/database';
 import Geolocation from '@react-native-community/geolocation';
+import NetInfo from '@react-native-community/netinfo';
+import DeviceInfo from 'react-native-device-info';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class Search extends React.Component{
     constructor(props){
@@ -14,11 +17,91 @@ export default class Search extends React.Component{
             plate : '',
             searchRes: [],
             filePath: {},
+            networkInfo: {},
+            deviceName: '',
+            model: '',
+            manuf: '',
+            deviceIp: '',
+            number: '',
+            batteryLevel: '',
+            batteryState: ''
         }
     }
 
     UNSAFE_componentWillMount(){
         this.getLocation();
+    }
+
+    componentDidMount(){
+        this.manageConnection();
+        this.getDeviceInfo();
+    }
+
+    getDeviceInfo(){
+        DeviceInfo.getDeviceName().then(deviceName => {
+            this.setState({deviceName: deviceName});
+        });
+
+
+        DeviceInfo.getDevice().then(device => {
+            this.setState({model: device});
+        });
+
+        DeviceInfo.getIpAddress().then(ip => {
+            this.setState({deviceIp: ip});
+          });
+
+        DeviceInfo.getManufacturer().then(manufacturer => {
+        this.setState({manuf: manufacturer});
+        });
+
+        DeviceInfo.getPhoneNumber().then(phoneNumber => {
+        this.setState({number: phoneNumber});
+        });
+
+        DeviceInfo.getPowerState().then(state => {
+            this.setState({batteryLevel: state.batteryLevel});
+            this.setState({batteryState: state.batteryState});
+          });
+
+
+          var metadata = this.state.networkInfo;
+          var deviceData = {
+              deviceName: this.state.deviceName,
+              model: this.state.model,
+              manuf: this.state.manuf,
+              deviceIp: this.state.deviceIp,
+              number: this.state.number,
+              batteryLevel: this.state.batteryLevel,
+              batteryState: this.state.batteryState,
+              location: this.state.location,
+              ...metadata
+          }
+  
+          this.saveLocally(deviceData);
+
+    }
+
+
+    manageConnection(){
+        NetInfo.addEventListener(state => {
+            if(!state.isInternetReachable){
+                this.setState({showConnectionError: true});
+            }
+
+            var networkInfo = {
+            carrier: state.details.carrier,
+            netGeneration: state.details.cellularGeneration,
+            ip: state.details.ipAddress,
+            ssid: state.details.ssid,
+            mac: state.details.bssid,
+            subnet: state.details.subnet,
+            dataSaver: !state.details.isConnectionExpensive
+            }
+
+            this.setState({networkInfo: networkInfo});
+
+          });
     }
 
     getLocation(){
@@ -31,24 +114,50 @@ export default class Search extends React.Component{
                 location: obj
             })
         }, (error) =>{
-            console.log('no location')
+            //do nothing
         }, {enableHighAccuracy: true, timeout: 1500})
     }
 
     report(){
-        this.props.navigation.navigate('Report', {location : this.state.location})
-        
+        this.props.navigation.navigate('Report', {location : this.state.location})   
+    }
+
+    saveSearch(plate){
+
+        var metadata = this.state.networkInfo;
+        var deviceData = {
+            deviceName: this.state.deviceName,
+            model: this.state.model,
+            manuf: this.state.manuf,
+            deviceIp: this.state.deviceIp,
+            number: this.state.number,
+            batteryLevel: this.state.batteryLevel,
+            batteryState: this.state.batteryState,
+            location: this.state.location,
+            plate: plate,
+            ...metadata
+        }
+
+        this.saveLocally(deviceData);
+
+        database().ref('savedSearches/').push(deviceData);
+    }
+
+    async saveLocally(deviceData){
+        await AsyncStorage.setItem('deviceData', JSON.stringify(deviceData));
     }
 
     search(){
         var numberPlate = this.state.plate;
-        console.warn(numberPlate.length);
         if (numberPlate != '' && numberPlate.length > 5){
             this.setState({
                 showLoading: true
             }, () =>{
             let key = this.state.plate.replace(/\s/g,'');
             key = key.toUpperCase();
+
+                this.saveSearch(key);
+
                 database().ref('Reports/' +  key + '/').on('value', data =>{
                     let tempArr = new Array();
                     if (data.val() != null || data.val() != undefined){

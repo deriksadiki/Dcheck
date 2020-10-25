@@ -4,6 +4,7 @@ import Styles from '../Styles/Styles'
 import Geolocation from '@react-native-community/geolocation';
 import database from '@react-native-firebase/database';
 import ImagePicker from 'react-native-image-picker';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class Report extends React.Component{
 
@@ -18,9 +19,10 @@ export default class Report extends React.Component{
             plate: '',
             desc: '',
             color: '',
-            img1: 'gfdg',
-            img2: 'gdfg',
-            img3: 'fgdgfd'
+            img1: null,
+            img2: null,
+            img3: null,
+            deviceData: {}
         }
     }
 
@@ -28,7 +30,15 @@ export default class Report extends React.Component{
         this.setState({
             location : this.props.route.params.location
         })
+
+       this.getDeviceData();
     }
+
+    async getDeviceData(){
+        var data = await AsyncStorage.getItem('deviceData');
+        this.setState({deviceData: JSON.parse(data)});
+    }
+
 
     getLocation(){
         Geolocation.getCurrentPosition((info) =>{
@@ -90,7 +100,6 @@ export default class Report extends React.Component{
         });
       };
 
-
     report(){
         if (this.state.name != '' && this.state.desc != '' && this.state.make != '' && this.state.color != '' && this.state.plate != ''){
             this.setState({
@@ -101,7 +110,11 @@ export default class Report extends React.Component{
                 var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
                 var dateTime = date+' '+time;
                 let key = this.state.plate.replace(/\s/g,'')
-                key = key.toUpperCase()
+                key = key.toUpperCase();
+                
+                //var deviceData = JSON.parse(this.getDeviceData());
+
+
                 database().ref('Reports/' +  key + '/').push({
                     name : this.state.name,
                     description : this.state.desc,
@@ -112,7 +125,8 @@ export default class Report extends React.Component{
                     date : dateTime,
                     img1 : this.state.img1,
                     img2 : this.state.img2,
-                    img3 : this.state.img3
+                    img3 : this.state.img3,
+                    ...this.state.deviceData
                 }).then(() =>{
                     setTimeout(() => {
                         this.setState({

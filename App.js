@@ -9,7 +9,8 @@ export default class App extends React.Component{
 
   componentDidMount(){
     PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
-    this.getLocationPermission()
+    this.getLocationPermission();
+    this.requestPhonePermission();
     setTimeout(() => {
       SplashScreen.hide()
     }, 4000);
@@ -44,6 +45,19 @@ export default class App extends React.Component{
     }
     requestLocationPermission();
     }
+  }
+
+  
+  async requestPhonePermission(){
+  const granted = await PermissionsAndroid.request(
+    PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,{
+        'title': 'Phone State Permission Required',
+        'message': 'DCHECK needs to access your phone state'
+    });
+
+  if(granted == PermissionsAndroid.RESULTS.GRANTED){
+      //do nothing
+  }
   }
 
     render(){
