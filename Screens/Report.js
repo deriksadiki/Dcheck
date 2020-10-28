@@ -1,10 +1,12 @@
 import React from 'react'
-import {Text, View, Alert, TouchableOpacity, TextInput, Modal, Image, ActivityIndicator,StatusBar} from 'react-native'
+import {PermissionsAndroid, Text, View, Alert, TouchableOpacity, TextInput, Modal, Image, ActivityIndicator,StatusBar} from 'react-native'
 import Styles from '../Styles/Styles'
 import Geolocation from '@react-native-community/geolocation';
 import database from '@react-native-firebase/database';
 import ImagePicker from 'react-native-image-picker';
 import AsyncStorage from '@react-native-community/async-storage';
+
+var myLocation = {};
 
 export default class Report extends React.Component{
 
@@ -31,7 +33,10 @@ export default class Report extends React.Component{
             location : this.props.route.params.location
         })
 
-       this.getDeviceData();
+        myLocation = this.props.route.params.location;
+
+        this.getLocationPermission();
+        this.getDeviceData();
     }
 
     async getDeviceData(){
@@ -39,27 +44,59 @@ export default class Report extends React.Component{
         this.setState({deviceData: JSON.parse(data)});
     }
 
-
-    getLocation(){
-        Geolocation.getCurrentPosition((info) =>{
-            let obj = {
-                lat: info.coords.latitude,
-                lng: info.coords.longitude
-            }
-            this.setState({location: obj});
-            this.props.navigation.navigate('Report', {location : this.state.location});
-
-        }, (error) =>{
-            console.log('no location')
-        }, {enableHighAccuracy: true, timeout: 1500})
-    }
-
-    report(){
-        if(this.state.location === ''){
-            this.getLocation();
+    getLocationPermission(){
+        var that =this;
+        if(Platform.OS === 'ios'){
+        try{
+        this.callLocation(that);
+        }catch(error){
+            console.warn(error, typeof error, error.stringify);
+            Alert.alert("Sorry, we need access to your location.");
+            this.getLocationPermission();
         }
-        this.props.navigation.navigate('Report', {location : this.state.location})
-    }
+        }else{
+        async function requestLocationPermission() {
+          try {
+              const granted = await PermissionsAndroid.request(
+                  PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,{
+                      'title': 'Location Access Required',
+                      'message': 'DCHECK needs to access your location'
+                  }
+              )
+              if (granted === PermissionsAndroid.RESULTS.GRANTED){
+                
+                
+                try{
+                    Geolocation.getCurrentPosition((info) =>{
+                        console.warn(info);
+                        let obj = {
+                            lat: info.coords.latitude,
+                            lng: info.coords.longitude
+                        }
+                        //this.setState({location: obj});
+                        myLocation = obj;
+                        console.warn(myLocation);
+                        //this.props.navigation.navigate('Report', {location : this.state.location});
+                    }, (error) =>{
+                        console.log(error, 'no location')
+                    }, {enableHighAccuracy: true, timeout: 1500});
+                }catch(e){
+                    throw e;
+                }
+
+
+
+              } else {
+                Alert.alert('',"Please note that by denying DCHECK to access your location, you may not be able to submit driver reports.");
+              }
+          } catch (err) {
+              console.warn(err)
+          }
+        }
+        requestLocationPermission();
+        }
+      }
+
 
     chooseFile = (number) => {
         var options = {
@@ -101,53 +138,60 @@ export default class Report extends React.Component{
       };
 
     report(){
-        if (this.state.name != '' && this.state.desc != '' && this.state.make != '' && this.state.color != '' && this.state.plate != ''){
-            this.setState({
-                showLoading: true
-            }, () =>{
-                var today = new Date();
-                var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-                var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-                var dateTime = date+' '+time;
-                let key = this.state.plate.replace(/\s/g,'')
-                key = key.toUpperCase();
-                
-                //var deviceData = JSON.parse(this.getDeviceData());
-
-
-                database().ref('Reports/' +  key + '/').push({
-                    name : this.state.name,
-                    description : this.state.desc,
-                    numberPlate : this.state.plate,
-                    location : this.state.location,
-                    color : this.state.color,
-                    make : this.state.make,
-                    date : dateTime,
-                    img1 : this.state.img1,
-                    img2 : this.state.img2,
-                    img3 : this.state.img3,
-                    ...this.state.deviceData
-                }).then(() =>{
-                    setTimeout(() => {
-                        this.setState({
-                            showLoading: false,
-                            showModal: true
-                        }) 
-                    }, 2000);
-                }, error =>{
-                    this.setState({
-                        showLoading: false,
-                    }, () =>{
-                        Alert.alert('', 'Something happened, Please check your internet connection and  try again!');
-                    }) 
-                })
-            })
-
+        if(myLocation === {} || myLocation === null || myLocation === ''){
+            this.getLocationPermission();
         }else{
-            Alert.alert('', 'Please enter all the information before you can report a driver');
+        this.processReport();
         }
-   
-    }
+}
+
+processReport(){
+if (this.state.name != '' && this.state.desc != '' && this.state.make != '' && this.state.color != '' && this.state.plate != ''){
+    this.setState({
+        showLoading: true
+    }, () =>{
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        var dateTime = date+' '+time;
+        let key = this.state.plate.replace(/\s/g,'')
+        key = key.toUpperCase();
+        
+        //var deviceData = JSON.parse(this.getDeviceData());
+
+
+        database().ref('Reports/' +  key + '/').push({
+            name : this.state.name,
+            description : this.state.desc,
+            numberPlate : this.state.plate,
+            location : myLocation,
+            color : this.state.color,
+            make : this.state.make,
+            date : dateTime,
+            img1 : this.state.img1,
+            img2 : this.state.img2,
+            img3 : this.state.img3,
+            ...this.state.deviceData
+        }).then(() =>{
+            setTimeout(() => {
+                this.setState({
+                    showLoading: false,
+                    showModal: true
+                }) 
+            }, 2000);
+        }, error =>{
+            this.setState({
+                showLoading: false,
+            }, () =>{
+                Alert.alert('', 'Something happened, Please check your internet connection and  try again!');
+            }) 
+        })
+    })
+
+}else{
+    Alert.alert('', 'Please enter all the information before you can report a driver');
+}
+}
     
     render(){
         return(

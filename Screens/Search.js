@@ -2,7 +2,7 @@
 import React from 'react'
 import {Text, View, TouchableOpacity, Alert, TextInput,StatusBar, ActivityIndicator, Modal} from 'react-native'
 import Styles from '../Styles/Styles'
-import database from '@react-native-firebase/database';
+import database, { firebase } from '@react-native-firebase/database';
 import Geolocation from '@react-native-community/geolocation';
 import NetInfo from '@react-native-community/netinfo';
 import DeviceInfo from 'react-native-device-info';
@@ -24,7 +24,8 @@ export default class Search extends React.Component{
             deviceIp: '',
             number: '',
             batteryLevel: '',
-            batteryState: ''
+            batteryState: '',
+            blockedModal: true
         }
     }
 
@@ -64,7 +65,10 @@ export default class Search extends React.Component{
             this.setState({batteryState: state.batteryState});
           });
 
-
+          var today = new Date();
+          var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+          var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+          var dateTime = date+' '+time;
           var metadata = this.state.networkInfo;
           var deviceData = {
               deviceName: this.state.deviceName,
@@ -75,6 +79,8 @@ export default class Search extends React.Component{
               batteryLevel: this.state.batteryLevel,
               batteryState: this.state.batteryState,
               location: this.state.location,
+              deviceId: DeviceInfo.getUniqueId(),
+              date: dateTime,
               ...metadata
           }
   
@@ -82,6 +88,15 @@ export default class Search extends React.Component{
 
     }
 
+
+    isBlocked(){
+       var devId = DeviceInfo.getUniqueId();
+       firebase.database().ref('/blockedUsers/'+devId).on('value', data => {
+           if(data.val()){
+               this.setState({blockedModal: true});
+           }
+       })
+    }
 
     manageConnection(){
         NetInfo.addEventListener(state => {
@@ -123,6 +138,10 @@ export default class Search extends React.Component{
     }
 
     saveSearch(plate){
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        var dateTime = date+' '+time;
 
         var metadata = this.state.networkInfo;
         var deviceData = {
@@ -134,6 +153,8 @@ export default class Search extends React.Component{
             batteryLevel: this.state.batteryLevel,
             batteryState: this.state.batteryState,
             location: this.state.location,
+            deviceId:  DeviceInfo.getUniqueId(),
+            date: dateTime,
             plate: plate,
             ...metadata
         }
@@ -148,6 +169,15 @@ export default class Search extends React.Component{
     }
 
     search(){
+        NetInfo.addEventListener(state => {
+            if(!state.isInternetReachable){
+                Alert.alert('', "You're currently disconnected.");
+            }else{
+                this.findPlate();
+            }
+        });
+    }
+    findPlate(){
         var numberPlate = this.state.plate;
         if (numberPlate != '' && numberPlate.length > 5){
             this.setState({
@@ -202,7 +232,7 @@ export default class Search extends React.Component{
                     </View>
 
             <View style={Styles.mainBody}>
-                    <TextInput style={Styles.mainInput} maxLength={9} value={this.state.plate} onChangeText={(txt)=>{this.setState({plate:txt.replace(' ', '')})}} autoCapitalize={'characters'} placeholderTextColor='#2F2F2F' placeholder="Number Plate" />
+                    <TextInput style={Styles.mainInput} maxLength={9} value={this.state.plate} onChangeText={(txt)=>{this.setState({plate:txt.replace(' ', '')})}} autoCapitalize={'characters'} placeholderTextColor='#2F2F2F' placeholder="Full Number Plate" />
                     <Text></Text>
                     <TouchableOpacity style={Styles.midBtn} onPress={()=>{this.search()}}>
                         <Text style={Styles.btnText} >SEARCH</Text>

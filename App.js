@@ -8,12 +8,12 @@ import SplashScreen from 'react-native-splash-screen'
 export default class App extends React.Component{
 
   componentDidMount(){
-    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
+    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
     this.getLocationPermission();
     this.requestPhonePermission();
     setTimeout(() => {
       SplashScreen.hide()
-    }, 4000);
+    }, 3900);
   }
     
   getLocationPermission(){

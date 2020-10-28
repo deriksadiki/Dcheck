@@ -4,7 +4,6 @@ let width = Dimensions.get('window').width
 let height =  Dimensions.get('window').height
 
 export default Styles =  StyleSheet.create({
-
     header:{
         marginTop: height * 0.03,
         marginLeft : width * 0.05
@@ -62,7 +61,6 @@ export default Styles =  StyleSheet.create({
     Button:{
         position : 'absolute',
         bottom : height * 0.03,
-       
     },
 
     alignThings:{
@@ -130,7 +128,7 @@ export default Styles =  StyleSheet.create({
         marginLeft : width * 0.05,
         textTransform: 'uppercase',
         fontSize: 20,
-        fontWeight: '900'
+        fontWeight: '900',
     },
 
     inputs:{
