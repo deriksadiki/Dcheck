@@ -32,9 +32,7 @@ export default class Report extends React.Component{
         this.setState({
             location : this.props.route.params.location
         })
-
         myLocation = this.props.route.params.location;
-
         this.getLocationPermission();
         this.getDeviceData();
     }
@@ -63,9 +61,7 @@ export default class Report extends React.Component{
                       'message': 'DCHECK needs to access your location'
                   }
               )
-              if (granted === PermissionsAndroid.RESULTS.GRANTED){
-                
-                
+              if (granted === PermissionsAndroid.RESULTS.GRANTED){      
                 try{
                     Geolocation.getCurrentPosition((info) =>{
                         console.warn(info);
@@ -84,10 +80,8 @@ export default class Report extends React.Component{
                     throw e;
                 }
 
-
-
               } else {
-                Alert.alert('',"Please note that by denying DCHECK to access your location, you may not be able to submit driver reports.");
+                Alert.alert('',"Please note that by denying DCHECK to access your location, you may not be able to submit driver reports. We'll ask you for your location again when you tap 'Report'");
               }
           } catch (err) {
               console.warn(err)
@@ -96,7 +90,6 @@ export default class Report extends React.Component{
         requestLocationPermission();
         }
       }
-
 
     chooseFile = (number) => {
         var options = {

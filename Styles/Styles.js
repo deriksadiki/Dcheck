@@ -182,4 +182,31 @@ export default Styles =  StyleSheet.create({
     innerText:{
         width : width * 0.75
     },
+    panic:{
+        height: height * 0.06,
+        width: width * 0.25,
+        marginLeft : width * 0.664,
+        top: (height * 0.115)*-1,
+        alignItems: 'center',
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignContent: 'center',
+        backgroundColor: '#FF006C',
+        borderRadius: 8
+    },
+    panicText:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 19
+    },
+    miniHeader:{
+        fontSize: 19,
+        fontWeight: 'bold',
+        marginLeft: width*0.05,
+        marginTop: 20
+    },
+    smallText:{
+        marginLeft: width*0.05,
+        marginTop: 5
+    }
 })

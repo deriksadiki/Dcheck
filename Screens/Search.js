@@ -1,12 +1,15 @@
 
 import React from 'react'
-import {Text, View, TouchableOpacity, Alert, TextInput,StatusBar, ActivityIndicator, Modal} from 'react-native'
-import Styles from '../Styles/Styles'
+import {PermissionsAndroid,Text, View, TouchableOpacity, Alert, TextInput,StatusBar, ActivityIndicator, Modal} from 'react-native'
+import Styles from '../Styles/Styles';
 import database, { firebase } from '@react-native-firebase/database';
 import Geolocation from '@react-native-community/geolocation';
 import NetInfo from '@react-native-community/netinfo';
 import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-community/async-storage';
+
+var myLocation = {};
+var canNav;
 
 export default class Search extends React.Component{
     constructor(props){
@@ -25,7 +28,11 @@ export default class Search extends React.Component{
             number: '',
             batteryLevel: '',
             batteryState: '',
-            blockedModal: true
+            blockedModal: false,
+            myname: '',
+            mycell: '',
+            c1cell: '',
+            c2cell: ''
         }
     }
 
@@ -36,6 +43,26 @@ export default class Search extends React.Component{
     componentDidMount(){
         this.manageConnection();
         this.getDeviceInfo();
+        this.intervalID = setInterval(()=>{this.listenForNav()}, 1000);
+    }
+
+
+    async listenForNav(){
+        if(canNav){
+            clearInterval(this.intervalID);
+            var navObject = {
+                location: myLocation,
+                name: this.state.myname,
+                mycell: this.state.mycell,
+                c1cell: this.state.c1cell,
+                c2cell: this.state.c2cell,
+                deviceId: DeviceInfo.getUniqueId()
+            }
+            await AsyncStorage.setItem('panicData', JSON.stringify(navObject)).then(()=>{
+            this.props.navigation.navigate('PanicMode');
+            canNav = false;
+            });
+        }
     }
 
     getDeviceInfo(){
@@ -87,7 +114,6 @@ export default class Search extends React.Component{
           this.saveLocally(deviceData);
 
     }
-
 
     isBlocked(){
        var devId = DeviceInfo.getUniqueId();
@@ -220,6 +246,89 @@ export default class Search extends React.Component{
         }
     }
 
+    async panicMode(){
+        var isConfigured = await AsyncStorage.getItem('panicConfig');
+        if(isConfigured){
+            this.enterPanicMode(isConfigured);
+        }else{
+            this.props.navigation.navigate('PanicConfig');
+        }
+    }
+
+    enterPanicMode(user_data){
+        var json_data = JSON.parse(user_data);
+        console.warn(json_data)
+        var myname = json_data.user_name;
+        var mycell = json_data.user_cell;
+        var c1cell = json_data.cont1_cell;
+        var c2cell = json_data.cont2_cell;
+
+        this.setState({mycell: json_data.user_cell});
+        this.setState({c1cell: json_data.cont1_cell});
+        this.setState({c2cell: json_data.cont2_cell});
+        this.setState({myname: myname});
+
+        console.warn(mycell, c1cell, c2cell);
+
+        if(mycell !== c1cell){
+            Alert.alert('Error', 'Something did not work... Try again later.');
+        }else{
+            this.getLocationPermission();
+        }
+    }
+    getLocationPermission(){
+        var that =this;
+        if(Platform.OS === 'ios'){
+        try{
+        this.callLocation(that);
+        }catch(error){
+            console.warn(error, typeof error, error.stringify);
+            Alert.alert("Sorry, we need access to your location.");
+            this.getLocationPermission();
+        }
+        }else{
+        async function requestLocationPermission() {
+          try {
+              const granted = await PermissionsAndroid.request(
+                  PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,{
+                      'title': 'Location Access Required',
+                      'message': 'DCHECK needs to access your location'
+                  }
+              )
+              if (granted === PermissionsAndroid.RESULTS.GRANTED){      
+                try{
+                    Geolocation.getCurrentPosition((info) =>{
+                        //console.warn(info);
+                        let obj = {
+                            lat: info.coords.latitude,
+                            lng: info.coords.longitude
+                        }
+                        //this.setState({location: obj});
+                        myLocation = obj;
+
+                        canNav = true;
+                        
+                        //this.props.navigation.navigate('Report', {location : this.state.location});
+                    }, (error) =>{
+                        console.log(error, 'no location')
+                    }, {enableHighAccuracy: true, timeout: 1500});
+                }catch(e){
+                    throw e;
+                }
+
+              } else {
+                Alert.alert('',"Please note that by denying DCHECK to access your location, you may not be able to submit driver reports. We'll ask you for your location again when you tap 'Report'");
+              }
+          } catch (err) {
+              console.warn(err)
+          }
+        }
+        requestLocationPermission();
+        }
+      }
+
+
+
     render(){
         return(
             <View style={{flex: 1, backgroundColor: '#FFFFFF'}}>
@@ -228,6 +337,7 @@ export default class Search extends React.Component{
                         <Text style={Styles.headerText} >DCHECK</Text>
                         <View style={Styles.innerText}>
                         <Text>Ready to start your ride? Look-up your driver by his number plate.</Text>
+                        <TouchableOpacity style={Styles.panic} onPress={()=>{this.panicMode()}}><Text style={Styles.panicText}>PANIC</Text></TouchableOpacity>
                         </View>
                     </View>
 
