@@ -1,5 +1,5 @@
 import React from 'react'
-import {Text, View,Alert, PermissionsAndroid} from 'react-native'
+import {Alert, PermissionsAndroid} from 'react-native'
 import {NavigationContainer} from '@react-navigation/native'
 import Stack from './Stack/Stack'
 import SplashScreen from 'react-native-splash-screen'
@@ -8,14 +8,14 @@ import SplashScreen from 'react-native-splash-screen'
 export default class App extends React.Component{
 
   componentDidMount(){
-    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
-    this.getLocationPermission()
+    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+    this.getLocationPermission();
+    this.requestPhonePermission();
     setTimeout(() => {
       SplashScreen.hide()
-    }, 4000);
+    }, 3900);
   }
     
-
   getLocationPermission(){
     var that =this;
     if(Platform.OS === 'ios'){
@@ -35,9 +35,9 @@ export default class App extends React.Component{
               }
           )
           if (granted === PermissionsAndroid.RESULTS.GRANTED){
-            console.log('')
+            //do nothing
           } else {
-            Alert.alert('',"Please not that by denying DCHECK to access your location, you may not be able to report a driver");
+            Alert.alert('',"Please not that by denying DCHECK to access your location, you may not be able to submit driver reports");
           }
       } catch (err) {
           console.warn(err)
@@ -45,6 +45,19 @@ export default class App extends React.Component{
     }
     requestLocationPermission();
     }
+  }
+
+  
+  async requestPhonePermission(){
+  const granted = await PermissionsAndroid.request(
+    PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,{
+        'title': 'Phone State Permission Required',
+        'message': 'DCHECK needs to access your phone state'
+    });
+
+  if(granted == PermissionsAndroid.RESULTS.GRANTED){
+      //do nothing
+  }
   }
 
     render(){

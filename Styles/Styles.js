@@ -4,7 +4,6 @@ let width = Dimensions.get('window').width
 let height =  Dimensions.get('window').height
 
 export default Styles =  StyleSheet.create({
-
     header:{
         marginTop: height * 0.03,
         marginLeft : width * 0.05
@@ -62,7 +61,6 @@ export default Styles =  StyleSheet.create({
     Button:{
         position : 'absolute',
         bottom : height * 0.03,
-       
     },
 
     alignThings:{
@@ -88,6 +86,9 @@ export default Styles =  StyleSheet.create({
     resBody:{
         width: width * 0.9,
         marginLeft : width * 0.05,
+        marginTop: 10,
+        borderBottomColor: '#f2f2f2',
+        borderBottomWidth: 1
     },
     bottomBtn:{
         height: height * 0.07,
@@ -111,7 +112,8 @@ export default Styles =  StyleSheet.create({
         justifyContent: 'center',
         alignContent: 'center',
         backgroundColor: '#4E00FF',
-        borderRadius: 8 
+        borderRadius: 8,
+        textTransform: 'uppercase'
     },
 
     mainInput:{
@@ -124,6 +126,9 @@ export default Styles =  StyleSheet.create({
         width: width * 0.9,
         textAlign: 'center',
         marginLeft : width * 0.05,
+        textTransform: 'uppercase',
+        fontSize: 20,
+        fontWeight: '900',
     },
 
     inputs:{
@@ -177,4 +182,31 @@ export default Styles =  StyleSheet.create({
     innerText:{
         width : width * 0.75
     },
+    panic:{
+        height: height * 0.06,
+        width: width * 0.25,
+        marginLeft : width * 0.664,
+        top: (height * 0.115)*-1,
+        alignItems: 'center',
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignContent: 'center',
+        backgroundColor: '#FF006C',
+        borderRadius: 8
+    },
+    panicText:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 19
+    },
+    miniHeader:{
+        fontSize: 19,
+        fontWeight: 'bold',
+        marginLeft: width*0.05,
+        marginTop: 20
+    },
+    smallText:{
+        marginLeft: width*0.05,
+        marginTop: 5
+    }
 })
