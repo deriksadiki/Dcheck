@@ -40,12 +40,26 @@ export default class Search extends React.Component{
         this.getLocation();
     }
 
-    componentDidMount(){
+    async componentDidMount(){
         this.manageConnection();
         this.getDeviceInfo();
-        this.intervalID = setInterval(()=>{this.listenForNav()}, 1000);
+        this.intervalID = setInterval(()=>{this.listenForNav()}, 300);
+
+        this.removePlate();
+
+        await AsyncStorage.getItem('panicConfig').then(res => {
+            if(!res || res == null){
+                Alert.alert('Setup Your Panic Button', 'Tap on the PANIC button to get started and save emergency contacts.');
+            }else{
+                //do nothing...
+            }
+        });
     }
 
+    async removePlate(){
+        //This is to prevent the app sending a previously searched plate via sms
+        await AsyncStorage.setItem('currentPlate', '');
+    }
 
     async listenForNav(){
         if(canNav){
@@ -56,11 +70,12 @@ export default class Search extends React.Component{
                 mycell: this.state.mycell,
                 c1cell: this.state.c1cell,
                 c2cell: this.state.c2cell,
-                deviceId: DeviceInfo.getUniqueId()
+                deviceId: DeviceInfo.getUniqueId(),
+                plate: this.state.plate
             }
             await AsyncStorage.setItem('panicData', JSON.stringify(navObject)).then(()=>{
             this.props.navigation.navigate('PanicMode');
-            canNav = false;
+            canNav = true;
             });
         }
     }
@@ -163,7 +178,15 @@ export default class Search extends React.Component{
         this.props.navigation.navigate('Report', {location : this.state.location})   
     }
 
+    async savePlate(plate){
+        await AsyncStorage.setItem('currentPlate', plate).then( async ()=>{
+           var thisPlate =  await AsyncStorage.getItem('currentPlate');
+           console.warn(thisPlate);
+        });
+    }
+
     saveSearch(plate){
+        this.savePlate(plate);
         var today = new Date();
         var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
@@ -247,12 +270,16 @@ export default class Search extends React.Component{
     }
 
     async panicMode(){
+        try{
         var isConfigured = await AsyncStorage.getItem('panicConfig');
         if(isConfigured){
             this.enterPanicMode(isConfigured);
         }else{
             this.props.navigation.navigate('PanicConfig');
         }
+    }catch(e){
+        console.warn(e);
+    }
     }
 
     enterPanicMode(user_data){
@@ -270,10 +297,11 @@ export default class Search extends React.Component{
 
         console.warn(mycell, c1cell, c2cell);
 
-        if(mycell !== c1cell){
+        if(mycell == c1cell){
             Alert.alert('Error', 'Something did not work... Try again later.');
         }else{
-            this.getLocationPermission();
+            canNav = true;
+            //this.getLocationPermission();
         }
     }
     getLocationPermission(){
@@ -356,8 +384,7 @@ export default class Search extends React.Component{
                     justifyContent: "center",
                     backgroundColor: 'black',
                     opacity: 0.3
-                }}
-                >
+                }}>
                     <ActivityIndicator size="large" color="#4E00FF" />
                 </View>
             </Modal>
