@@ -67,10 +67,8 @@ export default class PanicConfig extends React.Component{
             database().ref('/panicButton/'+deviceId).set(user_data).then(()=>{
                 this.saveLocally(user_data);
                 this.setState({showLoading: false});
-
                 Alert.alert('Successfully Saved!', 'For now, you will not be able to change these details.');
                 this.props.navigation.navigate('Disclaimer');
-
             });
 
         }else{

@@ -2,11 +2,10 @@ import React from 'react'
 import {Alert, PermissionsAndroid} from 'react-native'
 import {NavigationContainer} from '@react-navigation/native'
 import Stack from './Stack/Stack'
-import SplashScreen from 'react-native-splash-screen'
+import SplashScreen from 'react-native-splash-screen';
 
 
 export default class App extends React.Component{
-
   componentDidMount(){
     PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
     this.getLocationPermission();
