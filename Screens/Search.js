@@ -3,10 +3,11 @@ import React from 'react'
 import {PermissionsAndroid,Text, View, TouchableOpacity, Alert, TextInput,StatusBar, ActivityIndicator, Modal} from 'react-native'
 import Styles from '../Styles/Styles';
 import database, { firebase } from '@react-native-firebase/database';
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation from 'react-native-geolocation-service';
 import NetInfo from '@react-native-community/netinfo';
 import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-community/async-storage';
+
 
 var myLocation = {};
 var canNav;
@@ -300,10 +301,10 @@ export default class Search extends React.Component{
         if(mycell == c1cell){
             Alert.alert('Error', 'Something did not work... Try again later.');
         }else{
-            canNav = true;
-            //this.getLocationPermission();
+            this.getLocationPermission();
         }
     }
+
     getLocationPermission(){
         var that =this;
         if(Platform.OS === 'ios'){
@@ -345,7 +346,7 @@ export default class Search extends React.Component{
                 }
 
               } else {
-                Alert.alert('',"Please note that by denying DCHECK to access your location, you may not be able to submit driver reports. We'll ask you for your location again when you tap 'Report'");
+                Alert.alert('',"Please note that by denying DCHECK to access your location, you may not be able to use the panic feature");
               }
           } catch (err) {
               console.warn(err)

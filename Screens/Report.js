@@ -1,7 +1,7 @@
 import React from 'react'
 import {PermissionsAndroid, Text, View, Alert, TouchableOpacity, TextInput, Modal, Image, ActivityIndicator,StatusBar} from 'react-native'
 import Styles from '../Styles/Styles'
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation from 'react-native-geolocation-service';
 import database from '@react-native-firebase/database';
 import ImagePicker from 'react-native-image-picker';
 import AsyncStorage from '@react-native-community/async-storage';
